@@ -1,19 +1,9 @@
-ff = File.new("input.txt","r")
-farray = Array.new
-farray = ff.read
-p "Text length= "+farray.length.to_s
-ff.close
-minNumber = 100
-maxNumber = 253
-rnd = Random.new
 
 def powmod(b,x,m)
 	if (x == 0)
 		return 1
 	end
- 
 	tmp = powmod(b, x / 2, m)
- 
 	if (x % 2 == 1)
 		return (((tmp * tmp) % m) * b) % m
 	else
@@ -45,9 +35,7 @@ def MillerRabdoubleest(n, k)
 	end
 	rndl = Random.new
 	randNum = rndl.rand(n) + 2
-	
 	for i in 0..k do
-	
 		a = randNum.remainder(n - 1)
 		x = powmod(a, d, n)
 		if (x == 1 || x == n - 1)
@@ -96,7 +84,6 @@ def gcd(x, y)
 end
 
 def extendedEuclid(a, b, xx=0, yy=0, dd=0)
-
 	#объявим матрицу Е
 	#e11, e12, e21, e22
 	#объявим целую часть от деления и остаток
@@ -117,7 +104,6 @@ def extendedEuclid(a, b, xx=0, yy=0, dd=0)
 	end
 	#пока b не 0
 	while (b > 0) do
-	
 		@q = a / b
 		@r = a - b*@q
 		@qNeg = @N - @q
@@ -135,38 +121,77 @@ end
 
 def powmod(base, exp, modulo)
     @res = 1
-    
     while (exp != 0) do
         if ((exp & 1) != 0)
-        
             @res = (@res * base) % modulo
         end
-        
         base = (base * base) % modulo
         exp >>= 1
     end
-    
     return @res
 end
+
+
+$text = File.read("input.txt")
+minNumber = 2**59
+maxNumber = 2**63
+p "maxNumber= #{maxNumber} maxNumber.length= #{maxNumber.to_s(2).length}"
+rnd = Random.new
 
 $P = getPrimeNumber(minNumber, maxNumber)
 $Q = getPrimeNumber(minNumber, maxNumber)
 puts "P= #{$P} Q= #{$Q}"
 $N = $P*$Q
-p "N=#{$N} class=#{$N.class} id=#{$N.object_id}"
+p "N=#{$N} class=#{$N.class} id=#{$N.object_id} 2.length= #{$N.to_s(2).length}"
 $M = ($P-1)*($Q-1)
 p "M=#{$M}"
-#D = 0
 begin
 	$D = rnd.rand(minNumber..($M-1))
-	#p "rD=#{$D}" 
 end while (gcd($M,$D) != 1)
 p "D=#{$D}"
 $EE = extendedEuclid($M,$D)
 p "EE=#{$EE}"
-
+#тестирование функций
 $T = $N-5
 $encrypt = powmod($T, $EE, $N)
 p "encrypt= #{$encrypt}"
 $dencrypt = powmod($encrypt, $D, $N)
-p "dencrypt= #{$dencrypt} = #{$T}"
+if($dencrypt == $T)
+	p "dencrypt true"
+else
+	p "dencrypt false"
+end
+
+$arrayNum = $text.unpack "C*" #преобразовали строку в массив чисел
+#$str7 = $arrayNum[0].to_s
+$i=0
+$k=0
+$arrayStr = []
+while ($i<$arrayNum.length)
+	if($k==0)
+		$str7 = $arrayNum[$i].to_s
+	else
+		$str7 += $arrayNum[$i].to_s
+	end
+	$k += 1
+	if($k==14)
+		$arrayStr << $str7
+		$k=0
+	end
+	$i += 1
+end
+if($k>0)
+	$arrayStr << $str7
+end
+$arrayOfEncrypt = []
+for i in 0..($arrayStr.length-1) do
+	$arrayOfEncrypt << powmod($arrayStr[i].to_i,$EE, $N)
+end
+
+#p "$str7.length= #{$str7.to_i.to_s(2).length}"
+#$x = $str7.to_i
+#$crypt = powmod($x,$min,$max)
+#$str8 = $crypt.to_s(2)
+
+
+
