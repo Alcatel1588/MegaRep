@@ -1,0 +1,5 @@
+RSA refers to the so-called asymmetric algorithms, in which the encryption key is not the same as the decryption key. 
+One of the keys is available to all (as done on purpose) and is called the public key and the other is kept only its owner and is not known to anyone else. 
+With a single key, you can operate only in one direction. 
+If the message is encrypted using a single key, it can decrypt only with another. 
+With one of the keys is not possible (very difficult) to find the other key, if the key bit high.
