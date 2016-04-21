@@ -1,0 +1,30 @@
+def powmod(a, x, p)
+
+  @result = 1
+  while(x>0)
+      if (x%2==0)
+          x /= 2
+          a *= a % p
+      else
+          x-=1
+          @result *= a % p
+      end
+  end
+  return @result % p
+end
+
+def powmod(base, exp, modulo)
+    @res = 1
+    
+    while (exp != 0) do
+        if ((exp & 1) != 0)
+        
+            @res = (@res * base) % modulo
+        end
+        
+        base = (base * base) % modulo
+        exp >>= 1
+    end
+    
+    return @res
+end
