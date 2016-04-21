@@ -15,8 +15,17 @@ def powmod(base, exp, modulo)
     return @res
 end
 
-p "functtion"
-
-$N = powmod(314534534534534534,6445345234324233454,3145345345345345343) #
-
+p "function"
+$min = 2**57
+$max = 2**64
+$N = powmod(7,$min,$max)
 p "N= #{$N}"
+p "N.length= #{$N.to_s(2).length}"
+
+#f = File.open("new1.txt","r")
+$text = []
+$text = File.read("new1.txt")
+p "/7= #{$text.length / 7}" 
+p "%7= #{$text.length % 7}"
+
+
