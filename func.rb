@@ -27,5 +27,12 @@ $text = []
 $text = File.read("new1.txt")
 p "/7= #{$text.length / 7}" 
 p "%7= #{$text.length % 7}"
-
-
+$arrayNum = $text.unpack "C*" #преобразовали строку в массив чисел
+$str7 = $arrayNum[0].to_s
+for i in 1..6 do
+	$str7 += $arrayNum[i].to_s
+	end
+p "$str7.length= #{$str7.to_i.to_s(2).length}"
+$x = $str7.to_i
+$crypt = powmod($x,$min,$max)
+$str8 = $crypt.to_s(2)
