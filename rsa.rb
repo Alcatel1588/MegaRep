@@ -119,7 +119,7 @@ def extendedEuclid(a, b, xx=0, yy=0, dd=0)
 	return @e21
 end
 
-def powmod(base, exp, modulo)
+def powMod(base, exp, modulo)
     @res = 1
     while (exp != 0) do
         if ((exp & 1) != 0)
@@ -130,9 +130,17 @@ def powmod(base, exp, modulo)
     end
     return @res
 end
-
-
+def addToLeftZero(num, length, txt)
+	@n = num
+	if (num.length>length)
+		#p "Error addToLeftZero: "+txt
+		#gets.chomp
+	end
+	0.upto(length-@n.length-1){|i| @n.insert(0,"0")}
+	return @n
+end
 $text = File.read("input.txt")
+p "text.length= #{$text.length}"
 minNumber = 2**59
 maxNumber = 2**63
 p "maxNumber= #{maxNumber} maxNumber.length= #{maxNumber.to_s(2).length}"
@@ -153,9 +161,9 @@ $EE = extendedEuclid($M,$D)
 p "EE=#{$EE}"
 #тестирование функций
 $T = $N-5
-$encrypt = powmod($T, $EE, $N)
+$encrypt = powMod($T, $EE, $N)
 p "encrypt= #{$encrypt}"
-$dencrypt = powmod($encrypt, $D, $N)
+$dencrypt = powMod($encrypt, $D, $N)
 if($dencrypt == $T)
 	p "dencrypt true"
 else
@@ -163,18 +171,19 @@ else
 end
 
 $arrayNum = $text.unpack "C*" #преобразовали строку в массив чисел
+p $arrayNum[0,10]
 #$str7 = $arrayNum[0].to_s
 $i=0
 $k=0
 $arrayStr = []
 while ($i<$arrayNum.length)
 	if($k==0)
-		$str7 = $arrayNum[$i].to_s
+		$str7 = addToLeftZero($arrayNum[$i].to_s(2),8,"Partition text of numbers")
 	else
-		$str7 += $arrayNum[$i].to_s
+		$str7 += addToLeftZero($arrayNum[$i].to_s(2),8,"Partition text of numbers")
 	end
 	$k += 1
-	if($k==14)
+	if($k==15)
 		$arrayStr << $str7
 		$k=0
 	end
@@ -183,14 +192,69 @@ end
 if($k>0)
 	$arrayStr << $str7
 end
+p "massiv bit= " + $arrayStr[$arrayStr.length-1]+" %8= #{$arrayStr[$arrayStr.length-1].length%8} /8= #{$arrayStr[$arrayStr.length-1].length/8}"
+#добавили в массив последний блок и приступаем к шифрованию
 $arrayOfEncrypt = []
 for i in 0..($arrayStr.length-1) do
-	$arrayOfEncrypt << powmod($arrayStr[i].to_i,$EE, $N)
+	$arrayOfEncrypt << addToLeftZero(powMod($arrayStr[i].to_i(2),$EE, $N).to_s(2),128,"Partition encrypt for blocks")
 end
+$arrayOfEncryptBytes = []
+$x = 0
+#приступаем к разбиению зашифрованных блоков
+for i in 0..($arrayOfEncrypt.length-1) do
+	while($x < 128)
+		$arrayOfEncryptBytes << $arrayOfEncrypt[i][$x,$x+7].to_i(2)
+		$x += 8
+	end
+	$x = 0
+#0.step(by: 8, to: 128){|x| $arrayOfEncryptBytes << $arrayOfEncrypt[i][x,(x+8)].to_i(2)}
+end
+p"====="
+p $arrayOfEncrypt[0]
+p $arrayOfEncryptBytes[0]
+p $arrayOfEncryptBytes[1]
+p $arrayOfEncryptBytes[2]
+p "====="
+p "arrayOfEncryptBytes.length= #{$arrayOfEncryptBytes.length}"
+p "Encrypt array= #{$arrayOfEncryptBytes[0,10]}"
+#начало процесса расшифровки
+$i=0
+$k=0
+$arrayStr = []
+while ($i<$arrayOfEncryptBytes.length)
+	if($k==0)
+		$str7 = addToLeftZero($arrayOfEncryptBytes[$i].to_s(2),8,"Partition encrypt text of numbers")
+	else
+		$str7 += addToLeftZero($arrayOfEncryptBytes[$i].to_s(2),8,"Partition encrypt text of numbers")
+	end
+	$k += 1
+	if($k==16)
+		$arrayStr << $str7
+		$k=0
+	end
+	$i += 1
+end
+#приступаем к расшифрованию
+$arrayOfDencrypt = []
+for i in 0..($arrayStr.length-1) do
+	$arrayOfDencrypt << addToLeftZero(powMod($arrayStr[i].to_i(2),$D, $N).to_s(2),120,"Partition dencrypt for blocks")
+end
+$arrayOfDencryptBytes = []
+#приступаем к разбиению расшифрованных блоков
+for i in 0..($arrayOfDencrypt.length-1) do
+0.step(by: 8, to: 120){|x| $arrayOfDencryptBytes << $arrayOfDencrypt[i][x,(x+7)].to_i(2)}
+end
+$textDecript = $arrayOfDencryptBytes #преобразовали строку в массив чисел
+p $textDecript[0,10]
+#0.upto($arrayOfEncrypt.length-1){|i| }
 
+#$str8bit=$arrayOfEncrypt[0][0,7]
+#p $str8bit
+#
+p "11".to_i(2)
 #p "$str7.length= #{$str7.to_i.to_s(2).length}"
 #$x = $str7.to_i
-#$crypt = powmod($x,$min,$max)
+#$crypt = powMod($x,$min,$max)
 #$str8 = $crypt.to_s(2)
 
 
