@@ -1,4 +1,4 @@
-
+#coding: windows-1251
 def powmod(b,x,m)
 	if (x == 0)
 		return 1
@@ -133,14 +133,43 @@ end
 def addToLeftZero(num, length, txt)
 	@n = num
 	if (num.length>length)
-		#p "Error addToLeftZero: "+txt
+		p "Error addToLeftZero: "+txt
 		#gets.chomp
 	end
 	0.upto(length-@n.length-1){|i| @n.insert(0,"0")}
 	return @n
 end
-$text = File.read("input.txt")
-p "text.length= #{$text.length}"
+
+class RSAclient
+
+	def initialize(options={})
+	@size = options[:size]
+	end
+
+	# Наш геттер для свойства 
+	def size
+	@size
+	end
+	# Устанавливаем сеттер для свойства рос
+	def size=(size)
+	@size = size
+	end
+end
+#$text = File.read("intupsmall.txt","r:windows-1251")
+f = File.open("input.txt")
+$text = f.read
+p "text.length= #{$text.length} text=<"+$text+">"
+f.close
+=begin
+$arrayNum = []
+$ff = File.new("intupsmall.txt","r")
+p "ff.size=#{$ff.size}"
+0.upto($ff.size-3){|i| $arrayNum<<$ff.getbyte}
+$ff.close
+$text = $arrayNum.to_s
+p "text.length= #{$text.length} text=<"+$text+">"
+=end
+
 minNumber = 2**59
 maxNumber = 2**63
 p "maxNumber= #{maxNumber} maxNumber.length= #{maxNumber.to_s(2).length}"
@@ -171,7 +200,7 @@ else
 end
 
 $arrayNum = $text.unpack "C*" #преобразовали строку в массив чисел
-p $arrayNum[0,10]
+p $arrayNum[0..$arrayNum.size-1]
 #$str7 = $arrayNum[0].to_s
 $i=0
 $k=0
@@ -203,20 +232,14 @@ $x = 0
 #приступаем к разбиению зашифрованных блоков
 for i in 0..($arrayOfEncrypt.length-1) do
 	while($x < 128)
-		$arrayOfEncryptBytes << $arrayOfEncrypt[i][$x,$x+7].to_i(2)
+		$arrayOfEncryptBytes << $arrayOfEncrypt[i][$x..$x+7].to_i(2)
 		$x += 8
 	end
 	$x = 0
-#0.step(by: 8, to: 128){|x| $arrayOfEncryptBytes << $arrayOfEncrypt[i][x,(x+8)].to_i(2)}
+#0.step(by: 8, to: 127){|x| $arrayOfEncryptBytes << $arrayOfEncrypt[i][x..x+7].to_i(2)}
 end
-p"====="
-p $arrayOfEncrypt[0]
-p $arrayOfEncryptBytes[0]
-p $arrayOfEncryptBytes[1]
-p $arrayOfEncryptBytes[2]
-p "====="
 p "arrayOfEncryptBytes.length= #{$arrayOfEncryptBytes.length}"
-p "Encrypt array= #{$arrayOfEncryptBytes[0,10]}"
+p "Encrypt array= #{$arrayOfEncryptBytes[0..$arrayOfEncryptBytes.length-1]}"
 #начало процесса расшифровки
 $i=0
 $k=0
@@ -236,22 +259,43 @@ while ($i<$arrayOfEncryptBytes.length)
 end
 #приступаем к расшифрованию
 $arrayOfDencrypt = []
-for i in 0..($arrayStr.length-1) do
+for i in 0..($arrayStr.length-2) do
 	$arrayOfDencrypt << addToLeftZero(powMod($arrayStr[i].to_i(2),$D, $N).to_s(2),120,"Partition dencrypt for blocks")
 end
+$tempX = powMod($arrayStr[$arrayStr.length-1].to_i(2),$D, $N).to_s(2)
+$tempXl = $tempX.length / 8
+if ($tempX.length % 8 > 0)
+	$tempXl+=1
+end
+$tempXl = $tempXl*8
+p "tempXl=#{$tempXl}"
+$arrayOfDencrypt << addToLeftZero($tempX,$tempXl,"Partition dencrypt for blocks")
 $arrayOfDencryptBytes = []
 #приступаем к разбиению расшифрованных блоков
-for i in 0..($arrayOfDencrypt.length-1) do
-0.step(by: 8, to: 120){|x| $arrayOfDencryptBytes << $arrayOfDencrypt[i][x,(x+7)].to_i(2)}
+for i in 0..($arrayOfDencrypt.length-2) do
+0.step(by: 8, to: 119){|x| $arrayOfDencryptBytes << $arrayOfDencrypt[i][x..x+7].to_i(2)}
 end
-$textDecript = $arrayOfDencryptBytes #преобразовали строку в массив чисел
-p $textDecript[0,10]
+0.step(by: 8, to: $tempXl-1){|x| $arrayOfDencryptBytes << $arrayOfDencrypt[$arrayOfDencrypt.length-1][x..x+7].to_i(2)}
+
+
+$textDecript = $arrayOfDencryptBytes.pack('C'*$arrayOfDencryptBytes.size)#преобразовали строку в массив чисел
+p "massiv bites=#{$arrayOfDencryptBytes[0..$arrayOfDencryptBytes.length-1]}"
+p "massiv chars=#{$textDecript[0..$textDecript.size-1]}"
+p "Resalt text size - #{$textDecript.length}"
+f = File.open("output.txt", "w")
+f.write($textDecript)
+f.close
+#$text = $textDecript.pack "C*"
+#p $text
+#File.open("output.txt","w") do |f|
+#	f.puts $textDecript
+#	end
 #0.upto($arrayOfEncrypt.length-1){|i| }
 
 #$str8bit=$arrayOfEncrypt[0][0,7]
 #p $str8bit
 #
-p "11".to_i(2)
+#p "11".to_i(2)
 #p "$str7.length= #{$str7.to_i.to_s(2).length}"
 #$x = $str7.to_i
 #$crypt = powMod($x,$min,$max)
